@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hand Gesture Recognition</title>
+    <style>
+        #video {
+            display: none;
+        }
+        #canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+    </style>
+</head>
+<body>
+    <video id="video" width="640" height="480" autoplay></video>
+    <canvas id="canvas" width="640" height="480"></canvas>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/handtrackjs"></script>
+
+    <script>
+        // Get references to video and canvas elements
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+
+        // Load the Handtrack.js model
+        handTrack.load().then(model => {
+            console.log('Model loaded');
+            // Start video streaming
+            navigator.mediaDevices.getUserMedia({ video: {} }).then(stream => {
+                video.srcObject = stream;
+                // Detect hands in the video stream
+                setInterval(() => {
+                    model.detect(video).then(predictions => {
+                        // Draw bounding boxes around detected hands
+                        model.renderPredictions(predictions, canvas, context, video);
+                        // Process hand gestures
+                        processGestures(predictions);
+                    });
+                }, 100);
+            });
+        });
+
+        // Define function to process hand gestures
+        function processGestures(predictions) {
+            if (predictions.length > 0) {
+                // Assuming only one hand is detected
+                const hand = predictions[0].bbox;
+                const x = hand[0];
+                const y = hand[1];
+                const width = hand[2];
+                const height = hand[3];
+
+                // Example: Check if hand is in a specific region of the screen
+                if (x > 200 && x < 400 && y > 100 && y < 300) {
+                    console.log('Hand is in the specified region.');
+                    // Perform actions based on the gesture
+                    // For example, simulate a mouse click
+                    simulateMouseClick();
+                }
+            }
+        }
+
+        // Function to simulate a mouse click
+        function simulateMouseClick() {
+            // Perform any desired action here
+            console.log('Mouse click simulated.');
+        }
+    </script>
+</body>
+</html>
